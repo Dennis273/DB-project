@@ -9,11 +9,14 @@ using MyVideoManager.Models;
 
 namespace MyVideoManager.Controllers
 {
+    /// <summary>
+    /// The Works API class
+    /// </summary>
     [Route("api/[controller]")]
     public class WorkController : Controller
     {
-        // GET: /<controller>/
         private readonly WorkContext _context;
+
         public WorkController(WorkContext context)
         {
             _context = context;
@@ -54,6 +57,43 @@ namespace MyVideoManager.Controllers
             _context.SaveChanges();
 
             return CreatedAtRoute("GetWork", new { id = item.Id }, item);
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult Update(long id, [FromBody] Work item)
+        {
+            if (item == null || item.Id != id)
+            {
+                return BadRequest();
+            }
+
+            var work = _context.Works.FirstOrDefault(t => t.Id == id);
+            if (work == null)
+            {
+                return NotFound();
+            }
+
+            
+            work.Name = item.Name;
+            work.Episode = item.Episode;
+             
+            _context.Works.Update(item);
+            _context.SaveChanges();
+            return new NoContentResult();
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete(long id)
+        {
+            var work = _context.Works.FirstOrDefault(t => t.Id == id);
+            if (work == null)
+            {
+                return NotFound();
+            }
+
+            _context.Works.Remove(work);
+            _context.SaveChanges();
+            return new NoContentResult();
         }
 
     }
