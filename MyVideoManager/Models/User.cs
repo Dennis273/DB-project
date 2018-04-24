@@ -9,5 +9,6 @@ namespace MyVideoManager.Models
     public class User : IdentityUser
     {
         public string Password { get; set; }
+        ICollection<UserWork> Favs { get; set; }
     }
 }

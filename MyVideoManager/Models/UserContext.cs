@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -7,12 +8,11 @@ using System.Threading.Tasks;
 
 namespace MyVideoManager.Models
 {
-    public class UserDbContext : IdentityDbContext<User>
+    public class UserContext : IdentityDbContext<User>
     {
-        public UserDbContext(DbContextOptions<UserDbContext> options)
+        public UserContext(DbContextOptions<UserContext> options)
             : base(options)
         {
-
         }
     }
 }

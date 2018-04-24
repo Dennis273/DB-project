@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace MyVideoManager.Controllers
@@ -18,6 +19,8 @@ namespace MyVideoManager.Controllers
         public string Password { get; set; }
         public bool IsPersistent { get; set; }
         public string Email { get; set; }
+        public string UserRole { get; set; }
+        public string newPassword { get; set; }
     }
     [Route("[controller]")]
     public class UserController : Controller
@@ -43,7 +46,12 @@ namespace MyVideoManager.Controllers
             if (result.Succeeded)
             {
                 _logger.LogInformation(1, "User logged in");
-                return NoContent();
+                var loginUser = await _userManager.FindByNameAsync(user.UserName);
+                return Accepted(new UserData {
+                    UserName = loginUser.UserName,
+                    Email = loginUser.Email,
+                    Id = loginUser.Id,
+                });
             }
             else
             {
@@ -60,12 +68,14 @@ namespace MyVideoManager.Controllers
             var result = await _userManager.CreateAsync(user, userData.Password);
             if (result.Succeeded)
             {
+                await _userManager.AddToRoleAsync(user, "Admin");
                 _logger.LogInformation("User created a new account with password.");
                 return Created("/Register", new UserData
                 {
                     Id = user.Id,
                     UserName = user.UserName,
                     Email = user.Email,
+                    UserRole = "Admin",
                 });
             }
             else
@@ -78,6 +88,67 @@ namespace MyVideoManager.Controllers
                 return BadRequest(errors);
             }
         }
+        [Authorize]
+        [HttpPost("Logout")]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            _logger.LogInformation("User logged out.");
+            return Accepted();
+        }
 
+        [Authorize(Roles = "Admin, Manager")]
+        [HttpDelete("{Username}")]
+        public async Task<IActionResult> DeleteMember(string Username)
+        {
+            User targetUser = await _userManager.FindByNameAsync(Username);
+            if (targetUser == null) return BadRequest();
+            var roles = await _userManager.GetRolesAsync(targetUser);
+            if (roles.Contains("Member") == false)
+            {
+                return BadRequest();
+            }
+            await _userManager.DeleteAsync(targetUser);
+            return Accepted();
+        }
+        /// <summary>
+        /// Update User Info with given user data
+        /// </summary>
+        /// <param name="userData"></param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpPatch("Info")]
+        public async Task<IActionResult> UpdateUser([FromBody] UserData userData)
+        {
+            ClaimsPrincipal currentUser = this.User;
+            var user = await _userManager.GetUserAsync(currentUser);
+            if (userData.Email != null) user.Email = userData.Email;
+            if (userData.UserName != null) user.UserName = userData.UserName;
+            var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
+            {
+                return Accepted();
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+
+        [Authorize]
+        [HttpPatch("Password")]
+        public async Task<IActionResult> ChangePassword([FromBody] UserData userData)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var result = await _userManager.ChangePasswordAsync(user, userData.Password, userData.newPassword);
+            if (result.Succeeded)
+            {
+                return Accepted();
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
     }
 }

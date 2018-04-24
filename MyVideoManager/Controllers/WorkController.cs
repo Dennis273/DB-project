@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyVideoManager.Models;
 
@@ -12,7 +11,8 @@ namespace MyVideoManager.Controllers
     /// <summary>
     /// The Works API class
     /// </summary>
-    [Route("api/[controller]")]
+    [Authorize]
+    [Route("[controller]")]
     public class WorkController : Controller
     {
         private readonly WorkContext _context;
@@ -27,13 +27,23 @@ namespace MyVideoManager.Controllers
                 _context.SaveChanges();
             }
         }
-
+        /// <summary>
+        /// Get All works.
+        /// </summary>
+        /// <returns></returns>
+        [AllowAnonymous]
         [HttpGet]
         public IEnumerable<Work> GetAll()
         {
             return _context.Works.ToList();
         }
 
+        /// <summary>
+        /// Get  a specific work
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [AllowAnonymous]
         [HttpGet("{id}", Name = "GetWork")]
         public IActionResult GetById(long id)
         {
@@ -45,6 +55,11 @@ namespace MyVideoManager.Controllers
             return new ObjectResult(item);
         }
 
+        /// <summary>
+        /// Create a work
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
         [HttpPost]
         public IActionResult Create([FromBody] Work item)
         {
@@ -58,7 +73,14 @@ namespace MyVideoManager.Controllers
 
             return CreatedAtRoute("GetWork", new { id = item.Id }, item);
         }
-
+        /// <summary>
+        /// Update a specific work
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="item"></param>
+        /// <remarks>Should send the whole work object, or use PATCH</remarks>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin, Manager")]
         [HttpPut("{id}")]
         public IActionResult Update(long id, [FromBody] Work item)
         {
@@ -81,7 +103,13 @@ namespace MyVideoManager.Controllers
             _context.SaveChanges();
             return new NoContentResult();
         }
+        /// <summary>
+        /// Delete a specific work
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
 
+        [Authorize(Roles = "Administer")]
         [HttpDelete("{id}")]
         public IActionResult Delete(long id)
         {

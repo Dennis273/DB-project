@@ -10,5 +10,7 @@ namespace MyVideoManager.Models
         public long Id { get; set; }
         public string Name { get; set; }
         public int Episode { get; set; }
+        public Catagory Catagory { get; set; }
+        public ICollection<UserWork> Favs { get; set; }
     }
 }
