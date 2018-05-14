@@ -11,8 +11,8 @@ using System;
 namespace MyVideoManager.Migrations.Work
 {
     [DbContext(typeof(WorkContext))]
-    [Migration("20180423140354_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20180514160624_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

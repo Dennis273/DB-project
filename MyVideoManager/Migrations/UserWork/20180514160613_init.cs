@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 using System.Collections.Generic;
 
-namespace MyVideoManager.Migrations.Work
+namespace MyVideoManager.Migrations.UserWork
 {
-    public partial class InitialCreate : Migration
+    public partial class init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -54,7 +54,7 @@ namespace MyVideoManager.Migrations.Work
                 });
 
             migrationBuilder.CreateTable(
-                name: "Works",
+                name: "Work",
                 columns: table => new
                 {
                     Id = table.Column<long>(nullable: false)
@@ -64,9 +64,9 @@ namespace MyVideoManager.Migrations.Work
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Works", x => x.Id);
+                    table.PrimaryKey("PK_Work", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Works_Catagory_Name",
+                        name: "FK_Work_Catagory_Name",
                         column: x => x.Name,
                         principalTable: "Catagory",
                         principalColumn: "Name",
@@ -74,7 +74,7 @@ namespace MyVideoManager.Migrations.Work
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserWork",
+                name: "UserWorks",
                 columns: table => new
                 {
                     UserWorkId = table.Column<long>(nullable: false)
@@ -87,17 +87,17 @@ namespace MyVideoManager.Migrations.Work
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserWork", x => x.UserWorkId);
+                    table.PrimaryKey("PK_UserWorks", x => x.UserWorkId);
                     table.ForeignKey(
-                        name: "FK_UserWork_User_UserId",
+                        name: "FK_UserWorks_User_UserId",
                         column: x => x.UserId,
                         principalTable: "User",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_UserWork_Works_WorkId",
+                        name: "FK_UserWorks_Work_WorkId",
                         column: x => x.WorkId,
-                        principalTable: "Works",
+                        principalTable: "Work",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -108,28 +108,31 @@ namespace MyVideoManager.Migrations.Work
                 column: "AdministratorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserWork_UserId",
-                table: "UserWork",
-                column: "UserId");
+                name: "IX_UserWorks_UserId",
+                table: "UserWorks",
+                column: "UserId",
+                unique: true,
+                filter: "[UserId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserWork_WorkId",
-                table: "UserWork",
-                column: "WorkId");
+                name: "IX_UserWorks_WorkId",
+                table: "UserWorks",
+                column: "WorkId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Works_Name",
-                table: "Works",
+                name: "IX_Work_Name",
+                table: "Work",
                 column: "Name");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "UserWork");
+                name: "UserWorks");
 
             migrationBuilder.DropTable(
-                name: "Works");
+                name: "Work");
 
             migrationBuilder.DropTable(
                 name: "Catagory");
